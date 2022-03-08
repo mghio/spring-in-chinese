@@ -497,7 +497,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
-			//创建 bean 核心逻辑
+			// 创建 bean 核心逻辑
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Finished creating instance of bean '" + beanName + "'");
@@ -565,7 +565,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-		// TODO @mghio 下面这块代码是为了解决循环依赖的问题，以后有时间，再对循环依赖这个问题进行解析吧
+		// 下面这块代码是为了解决循环依赖的问题
+		// Bean 是单例的、IoC 容器允许循环依赖（默认是 true），当前的 Bean 在正在创建的 Bean 集合中（singletonsCurrentlyInCreation）
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
 		if (earlySingletonExposure) {
@@ -580,7 +581,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
-			// 这一步也是非常关键的，这一步负责属性装配，因为前面的实例只是实例化了，并没有设值，这里就是设值
+			// 这一步也是非常关键的，这一步负责属性装配，因为前面的实例只是实例化了，并没有设值，这里就是设值（属性赋值 && 自动注入）
 			populateBean(beanName, mbd, instanceWrapper);
 			// 还记得 init-method 吗？还有 InitializingBean 接口？还有 BeanPostProcessor 接口？
 			// 这里就是处理 bean 初始化完成后的各种回调
@@ -1362,6 +1363,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						// 这里有个非常有用的 BeanPostProcessor 进到这里: AutowiredAnnotationBeanPostProcessor
 						// 对采用 @Autowired、@Value 注解的依赖进行设值，这里的内容也是非常丰富的，不过本文不会展开说了，
 						// 感兴趣的读者请自行研究
+						// 调用 AutowiredAnnotationBeanPostProcessor 的 postProcessProperties 方法，触发自动注入。
 						pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
 						if (pvs == null) {
 							return;
